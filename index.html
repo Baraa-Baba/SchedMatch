@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Scheduler - Smart Schedule Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <h1>Course Scheduler</h1>
+                </div>
+                <div class="status-badge" id="statusBadge">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Ready to begin</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <!-- Left Panel: Data & Configuration -->
+            <section class="left-panel">
+                <!-- Step 1: Load Data -->
+                <div class="card step-card" id="step1">
+                    <div class="card-header">
+                        <div class="step-badge">Step 1</div>
+                        <h2>📊 Load Course Data</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="upload-area" id="uploadArea">
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <p class="upload-text">Drop CSV/Excel file here or click to browse</p>
+                            <input type="file" id="csvFileInput" accept=".csv,.xlsx,.xls" hidden>
+                            <button class="btn btn-secondary" id="browseBtn">Browse Files</button>
+                        </div>
+
+                        <!-- File Selection Options -->
+                        <div class="file-options">
+                            <div class="option-divider">
+                                <span>OR</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Select from existing files:</label>
+                                <div class="file-selection">
+                                    <select class="form-select" id="existingFileSelect">
+                                        <option value="">Choose a file...</option>
+                                        <option value="Summer_2024-2025_Course_Offerings.csv">Summer 2024-2025 Course Offerings</option>
+                                        <option value="Fall_2025-2026_Course_Offerings.csv">Fall 2025-2026 Course Offerings</option>
+                                        <option value="course_spring2025.csv">Spring 2025 Course Offerings</option>
+                                    </select>
+                                    <button class="btn btn-primary btn-sm" id="loadExistingBtn">Load File</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="data-status" id="dataStatus">
+                            <div class="status-item">
+                                <span class="status-label">Courses Loaded:</span>
+                                <span class="status-value" id="coursesCount">0</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Sections:</span>
+                                <span class="status-value" id="sectionsCount">0</span>
+                            </div>
+                        </div>
+
+                        <!-- Filter -->
+                        <div class="filter-section">
+                            <input type="text" class="form-input" id="filterInput" placeholder="🔍 Search courses, faculty, or title...">
+                        </div>
+
+                        <!-- Course Table -->
+                        <div class="table-container" id="tableContainer">
+                            <table class="course-table" id="courseTable">
+                                <thead>
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Title</th>
+                                        <th>Sec</th>
+                                        <th>CR</th>
+                                        <th>Faculty</th>
+                                        <th>Days</th>
+                                        <th>Start</th>
+                                        <th>End</th>
+                                        <th>Room</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="courseTableBody">
+                                    <tr class="no-data-row">
+                                        <td colspan="9">Load a CSV file to see course data</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="help-text">
+                            💡 Tip: Double-click a course to add it as required, or right-click for more options
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Configuration & Results -->
+            <section class="right-panel">
+                <div class="right-panel-scroll">
+                    <!-- Step 2: Required Courses -->
+                    <div class="card step-card" id="step2">
+                        <div class="card-header">
+                            <div class="step-badge">Step 2</div>
+                            <h2>📝 Required Courses</h2>
+                        </div>
+                        <div class="card-body">
+                            <p class="section-description">Select courses that you must take</p>
+                            <div class="list-container">
+                                <ul class="course-list" id="requiredCoursesList">
+                                    <li class="empty-state">No required courses yet</li>
+                                </ul>
+                            </div>
+                            <div class="status-info">
+                                <span id="requiredCoursesCount">0 required courses selected</span>
+                            </div>
+                            <div class="button-group">
+                                <button class="btn btn-primary btn-sm" id="addRequiredBtn">➕ Add Selected</button>
+                                <button class="btn btn-outline btn-sm" id="removeRequiredBtn">➖ Remove</button>
+                                <button class="btn btn-outline btn-sm" id="clearRequiredBtn">🗑️ Clear All</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Course Groups -->
+                    <div class="card step-card" id="step3">
+                        <div class="card-header">
+                            <div class="step-badge">Step 3</div>
+                            <h2>📦 Course Groups</h2>
+                            <span class="optional-badge">Optional</span>
+                        </div>
+                        <div class="card-body">
+                            <p class="section-description">Create groups like "2 out of 5 electives"</p>
+                            
+                            <!-- Create Group Form -->
+                            <div class="form-group">
+                                <div class="form-row">
+                                    <input type="text" class="form-input" id="groupNameInput" placeholder="Group name (e.g., Math Electives)">
+                                    <input type="number" class="form-input form-input-sm" id="groupCountInput" min="1" value="1" placeholder="Need">
+                                    <button class="btn btn-primary" id="createGroupBtn">✅ Create</button>
+                                </div>
+                            </div>
+
+                            <!-- Groups List -->
+                            <div class="groups-container">
+                                <div class="groups-list" id="groupsList">
+                                    <div class="empty-state">No groups created yet</div>
+                                </div>
+                                <div class="group-courses-panel" id="groupCoursesPanel">
+                                    <h4>Courses in Group</h4>
+                                    <div class="list-container">
+                                        <ul class="course-list" id="groupCoursesList">
+                                            <li class="empty-state">Select a group to manage courses</li>
+                                        </ul>
+                                    </div>
+                                    <div class="button-group">
+                                        <button class="btn btn-primary btn-sm" id="addToGroupBtn">➕ Add Selected</button>
+                                        <button class="btn btn-outline btn-sm" id="removeFromGroupBtn">🗑️ Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="status-info">
+                                <span id="groupsStatus">No groups created</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Faculty Preferences -->
+                    <div class="card step-card" id="step4">
+                        <div class="card-header">
+                            <div class="step-badge">Step 4</div>
+                            <h2>⭐ Faculty Preferences</h2>
+                            <span class="optional-badge">Optional</span>
+                        </div>
+                        <div class="card-body">
+                            <p class="section-description">Choose preferred instructors for your courses</p>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Course</label>
+                                <select class="form-select" id="courseSelect">
+                                    <option value="">Select a course...</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Preferred Faculty</label>
+                                <select class="form-select" id="facultySelect">
+                                    <option value="">Select faculty...</option>
+                                </select>
+                            </div>
+
+                            <button class="btn btn-primary" id="setPreferenceBtn">✅ Set Preference</button>
+
+                            <div class="preferences-display" id="preferencesDisplay">
+                                <h4>Current Preferences</h4>
+                                <ul id="preferencesList" class="preferences-list">
+                                    <li class="empty-state">No preferences set</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Schedule Preferences -->
+                    <div class="card step-card" id="step5">
+                        <div class="card-header">
+                            <div class="step-badge">Step 5</div>
+                            <h2>⚙️ Schedule Preferences</h2>
+                        </div>
+                        <div class="card-body">
+                            <!-- Time Preferences -->
+                            <div class="subsection">
+                                <h3>⏰ Time Preferences by Day</h3>
+                                <p class="section-description">
+                                    Set time windows for each day. Mark as <strong>Requirement</strong> to enforce strictly, or <strong>Preference</strong> for best-effort.
+                                </p>
+                                
+                                <div class="time-prefs-grid" id="timePrefsGrid">
+                                    <!-- Monday -->
+                                    <div class="time-pref-card" data-day="M">
+                                        <div class="day-header">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" class="day-enabled">
+                                                <span class="day-name">Monday</span>
+                                            </label>
+                                        </div>
+                                        <div class="time-controls">
+                                            <div class="time-row">
+                                                <label>From:</label>
+                                                <input type="time" class="time-input start-time" value="08:00">
+                                                <label>To:</label>
+                                                <input type="time" class="time-input end-time" value="17:00">
+                                            </div>
+                                            <div class="pref-type">
+                                                <label class="radio-label">
+                                                    <input type="radio" name="pref-M" value="preference" checked>
+                                                    <span>Preference</span>
+                                                </label>
+                                                <label class="radio-label">
+                                                    <input type="radio" name="pref-M" value="requirement">
+                                                    <span>Requirement</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Repeat for other days -->
+                                    <div class="time-pref-card" data-day="T">
+                                        <div class="day-header">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" class="day-enabled">
+                                                <span class="day-name">Tuesday</span>
+                                            </label>
+                                        </div>
+                                        <div class="time-controls">
+                                            <div class="time-row">
+                                                <label>From:</label>
+                                                <input type="time" class="time-input start-time" value="08:00">
+                                                <label>To:</label>
+                                                <input type="time" class="time-input end-time" value="17:00">
+                                            </div>
+                                            <div class="pref-type">
+                                                <label class="radio-label">
+                                                    <input type="radio" name="pref-T" value="preference" checked>
+                                                    <span>Preference</span>
+                                                </label>
+                                                <label class="radio-label">
+                                                    <input type="radio" name="pref-T" value="requirement">
+                                                    <span>Requirement</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="time-pref-card" data-day="W">
+                                        <div class="day-header">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" class="day-enabled">
+                                                <span class="day-name">Wednesday</span>
+                                            </label>
+                                        </div>
+                                        <div class="time-controls">
+                                            <div class="time-row">
+                                                <label>From:</label>
+                                                <input type="time" class="time-input start-time" value="08:00">
+                                                <label>To:</label>
+                                                <input type="time" class="time-input end-time" value="17:00">
+                                            </div>
+                                            <div class="pref-type">
+                                                <label class="radio-label">
+                                                    <input type="radio" name="pref-W" value="preference" checked>
+                                                    <span>Preference</span>
+                                                </label>
+                                                <label class="radio-label">
+                                                    <input type="radio" name="pref-W" value="requirement">
+                                                    <span>Requirement</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="time-pref-card" data-day="R">
+                                        <div class="day-header">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" class="day-enabled">
+                                                <span class="day-name">Thursday</span>
+                                            </label>
+                                        </div>
+                                        <div class="time-controls">
+                                            <div class="time-row">
+                                                <label>From:</label>
+                                                <input type="time" class="time-input start-time" value="08:00">
+                                                <label>To:</label>
+                                                <input type="time" class="time-input end-time" value="17:00">
+                                            </div>
+                                            <div class="pref-type">
+                                                <label class="radio-label">
+                                                    <input type="radio" name="pref-R" value="preference" checked>
+                                                    <span>Preference</span>
+                                                </label>
+                                                <label class="radio-label">
+                                                    <input type="radio" name="pref-R" value="requirement">
+                                                    <span>Requirement</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="time-pref-card" data-day="F">
+                                        <div class="day-header">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" class="day-enabled">
+                                                <span class="day-name">Friday</span>
+                                            </label>
+                                        </div>
+                                        <div class="time-controls">
+                                            <div class="time-row">
+                                                <label>From:</label>
+                                                <input type="time" class="time-input start-time" value="08:00">
+                                                <label>To:</label>
+                                                <input type="time" class="time-input end-time" value="17:00">
+                                            </div>
+                                            <div class="pref-type">
+                                                <label class="radio-label">
+                                                    <input type="radio" name="pref-F" value="preference" checked>
+                                                    <span>Preference</span>
+                                                </label>
+                                                <label class="radio-label">
+                                                    <input type="radio" name="pref-F" value="requirement">
+                                                    <span>Requirement</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="time-pref-card" data-day="S">
+                                        <div class="day-header">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" class="day-enabled">
+                                                <span class="day-name">Saturday</span>
+                                            </label>
+                                        </div>
+                                        <div class="time-controls">
+                                            <div class="time-row">
+                                                <label>From:</label>
+                                                <input type="time" class="time-input start-time" value="08:00">
+                                                <label>To:</label>
+                                                <input type="time" class="time-input end-time" value="17:00">
+                                            </div>
+                                            <div class="pref-type">
+                                                <label class="radio-label">
+                                                    <input type="radio" name="pref-S" value="preference" checked>
+                                                    <span>Preference</span>
+                                                </label>
+                                                <label class="radio-label">
+                                                    <input type="radio" name="pref-S" value="requirement">
+                                                    <span>Requirement</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Credit Range -->
+                            <div class="subsection">
+                                <h3>💳 Credit Range</h3>
+                                <div class="credit-controls">
+                                    <div class="form-group">
+                                        <label class="form-label">Minimum Credits</label>
+                                        <input type="number" class="form-input" id="minCredits" min="0" max="60" value="12">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Maximum Credits</label>
+                                        <input type="number" class="form-input" id="maxCredits" min="0" max="60" value="18">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Locked Sections -->
+                            <div class="subsection">
+                                <h3>🔒 Locked Sections</h3>
+                                <p class="section-description">Force specific sections into your schedule (right-click courses in table)</p>
+                                <div class="list-container">
+                                    <ul class="course-list" id="lockedSectionsList">
+                                        <li class="empty-state">No locked sections</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Run Button -->
+                            <div class="run-section">
+                                <div class="checklist" id="checklist">
+                                    <h4>Pre-flight Checklist</h4>
+                                    <ul id="checklistItems"></ul>
+                                </div>
+
+                                <label class="checkbox-label" style="margin: 1rem 0;">
+                                    <input type="checkbox" id="visualizeToggle">
+                                    <span>Visualize Algorithm Execution</span>
+                                </label>
+
+                                <div class="visualization-controls" id="visualizationControls" style="display: none; margin: 1rem 0;">
+                                    <div class="form-group">
+                                        <label class="form-label">Visualization Speed</label>
+                                        <div class="speed-control">
+                                            <input type="range" id="speedSlider" min="1" max="10" value="5" class="form-input">
+                                            <div class="speed-labels">
+                                                <span>Slow</span>
+                                                <span>Fast</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button class="btn btn-primary btn-large" id="runSchedulerBtn" disabled>
+                                    🚀 Generate My Schedule
+                                </button>
+
+                                <div class="progress-container" id="progressContainer" style="display: none;">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="progressFill"></div>
+                                    </div>
+                                    <p class="progress-text" id="progressText">Initializing...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results -->
+                    <div class="card step-card" id="resultsCard" style="display: none;">
+                        <div class="card-header">
+                            <h2>📋 Generated Schedule</h2>
+                            <div class="header-actions">
+                                <button class="btn btn-outline btn-sm" id="exportCsvBtn">💾 Export CSV</button>
+                                <button class="btn btn-outline btn-sm" id="viewVisualizationBtn">📅 View Schedule</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="results-summary" id="resultsSummary"></div>
+                            
+                            <div class="table-container">
+                                <table class="course-table results-table" id="resultsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Course</th>
+                                            <th>Title</th>
+                                            <th>Sec</th>
+                                            <th>Faculty</th>
+                                            <th>Days</th>
+                                            <th>Time</th>
+                                            <th>Room</th>
+                                            <th>CR</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="resultsTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Visualization Modal -->
+    <div class="modal" id="visualizationModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>📅 Schedule Visualization</h2>
+                <button class="modal-close" id="closeVisualizationBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="schedule-grid" id="scheduleGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <ul>
+            <li id="ctxAddRequired">Add to Required Courses</li>
+            <li id="ctxLockSection">Lock This Section</li>
+            <li id="ctxViewDetails">View Details</li>
+        </ul>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="scheduler.js"></script>
+    <script src="visualizer.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
