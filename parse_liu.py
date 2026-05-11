@@ -34,7 +34,7 @@ def extract_course_code(text):
     return text.split()[0].strip() if text else ""
 
 
-def parse_rows(html):
+def parse_rows(html, campus_filter="Beirut"):
     soup = BeautifulSoup(html, "html.parser")
     rows = soup.select("table#myClassesTable tbody tr")
     out = []
@@ -85,6 +85,9 @@ def parse_rows(html):
         if len(tds) >= 10:
             instructor = tds[9].get_text(strip=True)
 
+        if campus_filter and campus.strip().lower() != campus_filter.strip().lower():
+            continue
+
         remarks = "LIU Fall 2026"
         if campus:
             remarks = f"LIU Fall 2026, Campus: {campus}"
@@ -126,7 +129,7 @@ def write_csv(rows, path=OUTPUT_CSV):
 
 
 def main():
-    rows = parse_rows(coursesHtml)
+    rows = parse_rows(coursesHtml, campus_filter="Beirut")
     write_csv(rows)
     print(f"Wrote {len(rows)} rows to {OUTPUT_CSV}")
 
